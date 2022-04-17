@@ -1,0 +1,92 @@
+# create Database
+create database store;
+use store;
+
+# DDL
+
+# Countries
+create table countries(
+	code int primary key,
+    name varchar(20) unique,
+    continent_name varchar(20) not null
+);
+
+# users
+create table users(
+	id int primary key,
+    full_name varchar(20),
+    email varchar(20) unique,
+    gender char(1) check(gender = 'm' or gender = 'f'),
+    date_of_birth varchar(15),
+    created_at datetime default now(),
+    country_code int,
+    foreign key (country_code) references countries(code)
+);
+
+# orders
+create table orders(
+	id int primary key,
+    user_id int,
+    status varchar(6) check(status = "start" or status = "finish"),
+    created_at datetime default now(),
+    foreign key (user_id) references users(id)
+);
+
+#products
+create table products(
+	id int primary key,
+    name varchar(10) not null,
+    price int default 0,
+    status varchar(10) check(status = "valid" or status = "expired"),
+    created_at datetime default now()
+);
+
+# order_items
+create table order_products(
+	order_id int,
+    product_id int,
+    qunantity int default 0,
+    primary key (order_id, product_id),
+    foreign key (order_id) references orders(id),
+    foreign key (product_id) references products(id)
+);
+
+#DML
+
+#1 Add new row to the countries table.
+insert into countries(code, name, continent_name) 
+values(1, 'Saudi Arabia', 'Asia');
+
+#2 Add new row to the users table.
+insert into users(id, full_name, email, gender, date_of_birth, country_code)
+values(1, 'Azzam Alfurhud', 'Azzam@gmail.com', 'm', '1997', 1);
+
+#3 Add new row to the orders table.
+insert into orders(id, user_id, status)
+values(1, 1, 'start');
+
+#4 Add new row to the products table.
+insert into products(id, name, status)
+values(1, 'test', 'valid');
+
+#5 Add new row to the order_products table.
+insert into order_products(order_id, product_id)
+values(1, 1);
+
+#6 Update row from countries table.
+update countries set name = 'Saudi' where code = 1;
+
+#7 Delete row from products table.
+/* !! due to foreign key constraint i have to either remove the row from order_products first
+or delete a row with no constraint*/
+
+# first method: remove the row from order_products first
+delete from order_products where product_id = 1;
+delete from products where id = 1;
+
+# second method: delete a row with no constraint
+# We add a new product
+insert into products(id, name, status)
+values(2, 'delete', 'expired');
+# then we remove it
+delete from products where id = 2;
